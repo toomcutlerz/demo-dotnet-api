@@ -1,0 +1,12 @@
+﻿
+- Use .NET CLI:
+* Require: dotnet tool install --global dotnet-ef
+
+dotnet ef migrations add InitialCreate
+dotnet ef migrations add UpdateGreetingTable
+dotnet ef database update
+
+- Or use Package Manager:
+Add-Migration InitialCreate -StartupProject DemoDotnetApi
+Add-Migration UpdateGreetingTable -StartupProject DemoDotnetApi
+Update-Database  -StartupProject DemoDotnetApi

@@ -1,4 +1,4 @@
-# Demo Dotnet Api
+# Demo Dotnet Apis
 
 A .NET 8 Minimal API project with PostgreSQL, EF Core, and Docker Compose for easy development and testing. Includes CRUD for Greetings, Health checks, and WeatherForecast endpoints.
 

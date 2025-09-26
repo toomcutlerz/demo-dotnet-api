@@ -1,0 +1,53 @@
+name: Build and Deploy .NET Web API
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Restore Dependencies
+      run: dotnet restore
+
+    - name: Build & Publish
+      run: dotnet publish -c Release -o ./publish
+
+    - name: Copy Files to GCE
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ secrets.GCE_HOST }}
+        username: ${{ secrets.GCE_USER }}
+        key: ${{ secrets.GCE_SSH_KEY }}
+        source: "./publish/*"
+        target: "/var/www/myapp"
+
+    - name: Restart Service
+      uses: appleboy/ssh-action@v0.1.8
+      with:
+        host: ${{ secrets.GCE_HOST }}
+        username: ${{ secrets.GCE_USER }}
+        key: ${{ secrets.GCE_SSH_KEY }}
+        script: |
+          sudo systemctl restart myapp
+
+    - name: Run EF Core Migrations
+      uses: appleboy/ssh-action@v0.1.8
+      with:
+        host: ${{ secrets.GCE_HOST }}
+        username: ${{ secrets.GCE_USER }}
+        key: ${{ secrets.GCE_SSH_KEY }}
+        script: |
+          cd /var/www/myapp
+          dotnet ef database update --no-build --configuration Release
